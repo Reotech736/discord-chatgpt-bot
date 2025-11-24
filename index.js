@@ -235,7 +235,7 @@ client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
   if (!message.mentions.has(client.user) && !message.channel.isDMBased()) return;
 
-  const userMessage = message.content.replace(/<@!?\d+>/g, '').trim();
+  const rawUserMessage = message.content.replace(/<@!?\d+>/g, '').trim();
   const key = message.guild ? message.guild.id : `DM_${message.author.id}`;
 
   if (!settings[key]) settings[key] = { model: 'gpt-4o-mini', history: true };
@@ -244,7 +244,41 @@ client.on('messageCreate', async (message) => {
   const useHistory = settings[key].history;
 
   if (!conversationHistory[key]) conversationHistory[key] = [];
-  conversationHistory[key].push({ role: 'user', content: userMessage });
+
+  // 返信元（引用メッセージ）の取得
+  let repliedContent = null;
+  if (message.reference?.messageId) {
+    try {
+      const replied = await message.fetchReference();
+      if (replied && replied.content) {
+        repliedContent = replied.content;
+      }
+    } catch (err) {
+      console.error('引用メッセージ取得に失敗しました:', err);
+    }
+  }
+
+  // OpenAI に渡す user コンテンツを組み立て
+  let userContentForOpenAI;
+  if (repliedContent) {
+    // 返信元メッセージがある場合：引用＋質問をセットで渡す
+    userContentForOpenAI =
+      '以下の Discord メッセージの内容や意図が分かりにくいので、' +
+      '分かりやすく説明・要約・補足をしてください。\n' +
+      '必要に応じて、私の質問にも答えてください。\n\n' +
+      '--- 引用メッセージ ---\n' +
+      repliedContent + '\n' +
+      '----------------------\n\n' +
+      (rawUserMessage
+        ? `私からの質問: ${rawUserMessage}`
+        : '私からの追加の質問は特にありませんが、この内容を噛み砕いて説明してください。');
+  } else {
+    // 通常のメッセージ
+    userContentForOpenAI = rawUserMessage;
+  }
+
+  // 会話履歴に追加（保存するのも組み立て済みの方）
+  conversationHistory[key].push({ role: 'user', content: userContentForOpenAI });
 
   try {
     await message.channel.sendTyping();
@@ -274,7 +308,7 @@ client.on('messageCreate', async (message) => {
       messages: [
         { role: "system", content: "あなたは役立つアシスタントです。" },
         ...historyToSend,
-        { role: "user", content: userMessage }
+        { role: "user", content: userContentForOpenAI }
       ],
       tools,
       max_tokens: 1500
@@ -309,7 +343,7 @@ client.on('messageCreate', async (message) => {
           messages: [
             { role: "system", content: "あなたは役立つアシスタントです。" },
             ...historyToSend,
-            { role: "user", content: userMessage },
+            { role: "user", content: userContentForOpenAI },
             msg,
             {
               role: "tool",
