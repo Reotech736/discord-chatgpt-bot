@@ -105,9 +105,9 @@ async function fetch_url_content(url) {
 client.once('clientReady', async () => {
   console.log(`ログイン成功: ${client.user.tag}`);
 
-  // /model
+  // /ai_chat_model
   await client.application.commands.create({
-    name: 'model',
+    name: 'ai_chat_model',
     description: 'AIモデルを選択します',
     options: [
       {
@@ -125,15 +125,15 @@ client.once('clientReady', async () => {
     ],
   });
 
-  // /reset
+  // /ai_chat_history_reset
   await client.application.commands.create({
-    name: 'reset',
+    name: 'ai_chat_history_reset',
     description: '会話履歴をリセットします',
   });
 
-  // /history
+  // /ai_chat_history_mode
   await client.application.commands.create({
-    name: 'history',
+    name: 'ai_chat_history_mode',
     description: '会話履歴の使用を on/off します',
     options: [
       {
@@ -149,21 +149,21 @@ client.once('clientReady', async () => {
     ],
   });
 
-  // /history_status
+  // /ai_chat_history_status
   await client.application.commands.create({
-    name: 'history_status',
+    name: 'ai_chat_history_status',
     description: '覚えている履歴を表示します',
   });
 
-  // /usage_token
+  // /ai_chat_token_usage
   await client.application.commands.create({
-    name: 'usage_token',
+    name: 'ai_chat_token_usage',
     description: 'Bot起動後のトークン使用量を表示します',
   });
 
-  // /reset_token
+  // /ai_chat_token_reset
   await client.application.commands.create({
-    name: 'reset_token',
+    name: 'ai_chat_token_reset',
     description: 'トークン使用量の統計をリセットします',
   });
 
@@ -179,30 +179,30 @@ client.on('interactionCreate', async (interaction) => {
   const key = interaction.guildId ? interaction.guildId : `DM_${interaction.user.id}`;
   if (!settings[key]) settings[key] = { model: 'gpt-4o-mini', history: true };
 
-  // /model
-  if (interaction.commandName === 'model') {
+  // /ai_chat_model
+  if (interaction.commandName === 'ai_chat_model') {
     const name = interaction.options.getString('name');
     settings[key].model = name;
     saveSettings();
     return interaction.reply({ content: `モデルを **${name}** に設定しました`, flags: 64 });
   }
 
-  // /reset
-  if (interaction.commandName === 'reset') {
+  // /ai_chat_history_reset
+  if (interaction.commandName === 'ai_chat_history_reset') {
     conversationHistory[key] = [];
     return interaction.reply({ content: '会話履歴をリセットしました', flags: 64 });
   }
 
-  // /history
-  if (interaction.commandName === 'history') {
+  // /ai_chat_history_mode
+  if (interaction.commandName === 'ai_chat_history_mode') {
     const mode = interaction.options.getString('mode');
     settings[key].history = mode === 'on';
     saveSettings();
     return interaction.reply({ content: `履歴参照を **${mode}** に設定しました`, flags: 64 });
   }
 
-  // /history_status
-  if (interaction.commandName === 'history_status') {
+  // /ai_chat_history_status
+  if (interaction.commandName === 'ai_chat_history_status') {
     const hist = conversationHistory[key] || [];
     if (hist.length === 0) {
       return interaction.reply({ content: '履歴は空です', flags: 64 });
@@ -211,8 +211,8 @@ client.on('interactionCreate', async (interaction) => {
     return interaction.reply({ content: `**履歴一覧**\n${out}`, flags: 64 });
   }
 
-  // /usage_token
-  if (interaction.commandName === 'usage_token') {
+  // /ai_chat_token_usage
+  if (interaction.commandName === 'ai_chat_token_usage') {
     const msg =
       `**トークン使用量（起動後）**\n` +
       `総トークン: ${tokenStats.total_tokens}\n` +
@@ -221,8 +221,8 @@ client.on('interactionCreate', async (interaction) => {
     return interaction.reply({ content: msg, flags: 64 });
   }
 
-  // /reset_token
-  if (interaction.commandName === 'reset_token') {
+  // /ai_chat_token_reset
+  if (interaction.commandName === 'ai_chat_token_reset') {
     resetTokenStats();
     return interaction.reply({ content: 'トークン統計をリセットしました', flags: 64 });
   }
