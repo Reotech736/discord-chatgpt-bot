@@ -1,6 +1,6 @@
 {
   "1338478877894377472": {
-    "model": "gpt-4o",
-    "history": false
+    "model": "gpt-5-mini",
+    "history": true
   }
 }

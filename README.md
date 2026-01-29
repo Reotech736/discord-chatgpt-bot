@@ -5,13 +5,13 @@ ChatGPT API（OpenAI API）を使った Discord ボットです。
 
 - 会話の履歴 ON/OFF 切り替え
 - URL の本文取得 ＋ 要約（function calling）
-- モデル切り替え（gpt-4o / gpt-4o-mini / o3-mini / o1-mini）
+- モデル切り替え（gpt-4o / gpt-4o-mini / gpt-5 / gpt-5-mini / o3-mini）
 - トークン使用量の集計・リセット
 
 などの機能を備えています。
 
 このボットは **OpenAI API の従量課金制（トークン課金）** で動作します。  
-利用状況に応じて OpenAI 側の料金が発生するため、APIキーの管理や `/usage_token` コマンドでのトークン確認を推奨します。
+利用状況に応じて OpenAI 側の料金が発生するため、APIキーの管理や `/ai_chat_token_usage` コマンドでのトークン確認を推奨します。
 
 ---
 
@@ -136,26 +136,27 @@ node index.js
 
 ## 実装されているスラッシュコマンド
 
-### `/model`
+### `/ai_chat_model`
 
 使用する AI モデルを切り替えます（ギルド / DM 単位）。
 
 ```txt
-/model name: gpt-4o-mini（速い・軽い）
+/ai_chat_model name: gpt-4o-mini（速い・軽い）
 ```
 
 選べるモデル：
 
 * `gpt-4o-mini（速い・軽い）`
 * `gpt-4o（高品質）`
+* `gpt-5（最新・高品質）`
+* `gpt-5-mini（最新・軽量）`
 * `o3-mini（推論強い）`
-* `o1-mini（コード向き）`
 
 ※ 内部的には `value`（モデル名）が API に送られます。
 
 ---
 
-### `/history`
+### `/ai_chat_history_mode`
 
 会話の履歴参照を ON/OFF します。
 
@@ -165,20 +166,20 @@ node index.js
 例：
 
 ```txt
-/history mode: on
-/history mode: off
+/ai_chat_history_mode mode: on
+/ai_chat_history_mode mode: off
 ```
 
 ---
 
-### `/reset`
+### `/ai_chat_history_reset`
 
 現在のギルド / DM に対応する **会話履歴を削除** します。
 「さっきの話は忘れてほしい」ときに使用します。
 
 ---
 
-### `/history_status`
+### `/ai_chat_history_status`
 
 Bot が現在「そのギルド / DM」で覚えている会話履歴の一覧を確認できます。
 
@@ -188,7 +189,7 @@ Bot が現在「そのギルド / DM」で覚えている会話履歴の一覧�
 
 ---
 
-### `/usage_token`
+### `/ai_chat_token_usage`
 
 Bot 起動後に消費した **トークンの累計** を確認します。
 
@@ -202,7 +203,7 @@ Bot 起動後に消費した **トークンの累計** を確認します。
 
 ---
 
-### `/reset_token`
+### `/ai_chat_token_reset`
 
 `/usage_token` で集計しているトークン統計（`tokenStats`）をリセットします。
 

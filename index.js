@@ -105,67 +105,66 @@ async function fetch_url_content(url) {
 client.once('clientReady', async () => {
   console.log(`ログイン成功: ${client.user.tag}`);
 
-  // /ai_chat_model
-  await client.application.commands.create({
-    name: 'ai_chat_model',
-    description: 'AIモデルを選択します',
-    options: [
-      {
-        name: 'name',
-        type: 3,
-        description: 'モデル名',
-        required: true,
-        choices: [
-          { name: 'gpt-4o-mini（速い・軽い）', value: 'gpt-4o-mini' },
-          { name: 'gpt-4o（高品質）', value: 'gpt-4o' },
-          { name: 'o3-mini（推論強い）', value: 'o3-mini' },
-          { name: 'o1-mini（コード向き）', value: 'o1-mini' },
-        ],
-      },
-    ],
-  });
-
-  // /ai_chat_history_reset
-  await client.application.commands.create({
-    name: 'ai_chat_history_reset',
-    description: '会話履歴をリセットします',
-  });
-
-  // /ai_chat_history_mode
-  await client.application.commands.create({
-    name: 'ai_chat_history_mode',
-    description: '会話履歴の使用を on/off します',
-    options: [
-      {
-        name: 'mode',
-        type: 3,
-        description: 'on または off',
-        required: true,
-        choices: [
-          { name: 'on', value: 'on' },
-          { name: 'off', value: 'off' },
-        ],
-      },
-    ],
-  });
-
-  // /ai_chat_history_status
-  await client.application.commands.create({
-    name: 'ai_chat_history_status',
-    description: '覚えている履歴を表示します',
-  });
-
-  // /ai_chat_token_usage
-  await client.application.commands.create({
-    name: 'ai_chat_token_usage',
-    description: 'Bot起動後のトークン使用量を表示します',
-  });
-
-  // /ai_chat_token_reset
-  await client.application.commands.create({
-    name: 'ai_chat_token_reset',
-    description: 'トークン使用量の統計をリセットします',
-  });
+  // set() は未使用コマンドを削除して古い候補を消す
+  await client.application.commands.set([
+    // /ai_chat_model
+    {
+      name: 'ai_chat_model',
+      description: 'AIモデルを選択します',
+      options: [
+        {
+          name: 'name',
+          type: 3,
+          description: 'モデル名',
+          required: true,
+          choices: [
+            { name: 'gpt-4o-mini（速い・軽い）', value: 'gpt-4o-mini' },
+            { name: 'gpt-4o（高品質）', value: 'gpt-4o' },
+            { name: 'gpt-5（最新・高品質）', value: 'gpt-5' },
+            { name: 'gpt-5-mini（最新・軽量）', value: 'gpt-5-mini' },
+            { name: 'o3-mini（推論強い）', value: 'o3-mini' },
+          ],
+        },
+      ],
+    },
+    // /ai_chat_history_reset
+    {
+      name: 'ai_chat_history_reset',
+      description: '会話履歴をリセットします',
+    },
+    // /ai_chat_history_mode
+    {
+      name: 'ai_chat_history_mode',
+      description: '会話履歴の使用を on/off します',
+      options: [
+        {
+          name: 'mode',
+          type: 3,
+          description: 'on または off',
+          required: true,
+          choices: [
+            { name: 'on', value: 'on' },
+            { name: 'off', value: 'off' },
+          ],
+        },
+      ],
+    },
+    // /ai_chat_history_status
+    {
+      name: 'ai_chat_history_status',
+      description: '覚えている履歴を表示します',
+    },
+    // /ai_chat_token_usage
+    {
+      name: 'ai_chat_token_usage',
+      description: 'Bot起動後のトークン使用量を表示します',
+    },
+    // /ai_chat_token_reset
+    {
+      name: 'ai_chat_token_reset',
+      description: 'トークン使用量の統計をリセットします',
+    },
+  ]);
 
   console.log('全コマンド登録完了');
 });
@@ -311,7 +310,7 @@ client.on('messageCreate', async (message) => {
         { role: "user", content: userContentForOpenAI }
       ],
       tools,
-      max_tokens: 1500
+      max_completion_tokens: 1500
     });
 
     // トークン記録
@@ -351,7 +350,7 @@ client.on('messageCreate', async (message) => {
               content: result
             }
           ],
-          max_tokens: 1500
+          max_completion_tokens: 1500
         });
 
         const u2 = second.usage;
